@@ -17,8 +17,7 @@ spec:
     spec:
       containers:
       - name: php-redis
-        image: docker.io/library/frontend-custom:v1
-        imagePullPolicy: Never
+        image: public.ecr.aws/j8z6r8s6/test-project:latest
         resources:
           requests:
             cpu: 100m
