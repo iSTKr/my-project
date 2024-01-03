@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
-  replicas: 1
+  replicas: {{ .Values.frontend.replicas }}
   selector:
     matchLabels:
         app: guestbook
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: php-redis
-        image: public.ecr.aws/d1s2e7g7/my-project:latest
+        image: {{ .Values.frontend.image }}
         resources:
           requests:
             cpu: 100m

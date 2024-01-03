@@ -16,10 +16,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build and push Docker image
         run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/d1s2e7g7
-          docker build -t my-project .
-          docker tag my-project:latest public.ecr.aws/d1s2e7g7/my-project:latest
-          docker push public.ecr.aws/d1s2e7g7/my-project:latest
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 695079529626.dkr.ecr.eu-central-1.amazonaws.com
+          docker build -t app_ecr .
+          docker tag app_ecr:latest 695079529626.dkr.ecr.eu-central-1.amazonaws.com/app_ecr:latest
+          docker push 695079529626.dkr.ecr.eu-central-1.amazonaws.com/app_ecr:latest
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

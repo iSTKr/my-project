@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  provision:
     runs-on: ubuntu-latest
     environment: test
     steps:

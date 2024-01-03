@@ -2,25 +2,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: redis-leader
+  labels:
+    app: redis
+    role: leader
+    tier: backend
 spec:
-  replicas: 1
+  replicas: {{ .Values.redisLeader.replicas }}
   selector:
     matchLabels:
-        app: guestbook
-        tier: frontend
+      app: redis
   template:
     metadata:
       labels:
-        app: guestbook
-        tier: frontend
+        app: redis
+        role: leader
+        tier: backend
     spec:
       containers:
-      - name: php-redis
-        image: public.ecr.aws/d1s2e7g7/my-project:latest
+      - name: leader
+        image: {{ .Values.redisLeader.image }}
         resources:
           requests:
             cpu: 100m
             memory: 100Mi
         ports:
-        - containerPort: 80
+        - containerPort: 6379
