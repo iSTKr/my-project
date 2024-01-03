@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy helm chart
 
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
@@ -18,7 +18,7 @@ jobs:
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region eu-central-1 --name app-eks-cluster
-          bash -x deploy.sh
+          helm install app-chart ./app-chart
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
