@@ -9,17 +9,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     environment: test
     steps:
       - uses: actions/checkout@v3
       - name: Build and push Docker image
         run: |
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 695079529626.dkr.ecr.eu-central-1.amazonaws.com
-          docker build -t app_ecr .
-          docker tag app_ecr:latest 695079529626.dkr.ecr.eu-central-1.amazonaws.com/app_ecr:latest
-          docker push 695079529626.dkr.ecr.eu-central-1.amazonaws.com/app_ecr:latest
+          cd kubernetes
+          aws eks update-kubeconfig --region eu-central-1 --name app-eks-cluster
+          bash -x deploy.sh
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

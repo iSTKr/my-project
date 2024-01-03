@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        input[type="email"], input[type="password"] {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 200px;
+        }
+
+        button {
+            background-color: lightblue;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        a {
+            display: block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <input type="email" id="emailInput" placeholder="Email" required>
+        <input type="password" id="passwordInput" placeholder="Password" required>
+<!--        <input type="password" placeholder="Confirm Password" required>-->
+        <button type="submit" onclick="registerUser()">Register</button>
+        <a href="index.html"><- Login</a>
+    </form>
+    <script type="module" src="//wsl$/Ubuntu/home/stk/temp/assesment/CASH.f/backend/src/register.js"></script>
+</body>
+</html>
