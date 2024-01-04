@@ -16,7 +16,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
@@ -98,7 +98,9 @@ tolerations: []
 affinity: {}
 
 frontend:
-  image: public.ecr.aws/d1s2e7g7/my-project:latest
+  image:
+    repository: public.ecr.aws/d1s2e7g7/my-project
+    tag: "latest"
   replicas: 1
 
 redisLeader:
