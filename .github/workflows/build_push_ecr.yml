@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
     steps:
+      - uses: actions/checkout@v3
       - name: Extract release version
         run: echo "RELEASE_VERSION=$(echo ${GITHUB_REF#refs/heads/release/**})" >> $GITHUB_ENV
         if: startsWith(github.ref, 'refs/heads/release/**')
@@ -30,7 +31,6 @@ jobs:
           docker push $ECR_REPOSITORY/my-project:$RELEASE_VERSION
 
       - name: Deploy helm chart
-        uses: actions/checkout@v3
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
