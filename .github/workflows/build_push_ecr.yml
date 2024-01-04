@@ -22,7 +22,7 @@ jobs:
 
       - name: Extract release version
         run: |
-          echo "RELEASE_VERSION=$(echo ${GITHUB_REF#refs/heads/release/**})" >> $GITHUB_ENV
+          export "RELEASE_VERSION=$(echo ${GITHUB_REF#refs/heads/release/**})"
           echo $RELEASE_VERSION
 
       - name: Build and push Docker image
