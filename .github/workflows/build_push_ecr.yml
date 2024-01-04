@@ -22,14 +22,13 @@ jobs:
 
       - name: Extract release version
         run: |
-          echo $GITHUB_HEAD_REF
           echo "RELEASE_VERSION=$(echo ${GITHUB_HEAD_REF#release/**})" >> $GITHUB_ENV
-          echo $RELEASE_VERSION
 
       - name: Build and push Docker image
         run: |
-          docker build -t my-project:$RELEASE_VERSION .
+          echo $ECR_REPOSITORY
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPOSITORY
+          docker build -t my-project:$RELEASE_VERSION .
           docker tag my-project:$RELEASE_VERSION $ECR_REPOSITORY/my-project:$RELEASE_VERSION
           docker push $ECR_REPOSITORY/my-project:$RELEASE_VERSION
 
