@@ -27,7 +27,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker build -t my-project:$RELEASE_VERSION . 
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ vars.$ECR_REPOSITORY }}
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPOSITORY
           docker tag my-project:$RELEASE_VERSION ${{ vars.$ECR_REPOSITORY }}/my-project:$RELEASE_VERSION
           docker push $ECR_REPOSITORY/my-project:$RELEASE_VERSION
 
