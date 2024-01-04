@@ -22,6 +22,7 @@ jobs:
 
       - name: Extract release version
         run: |
+          echo $GITHUB_HEAD_REF
           export "RELEASE_VERSION=$(echo ${GITHUB_HEAD_REF#refs/heads/release/**})"
           echo $RELEASE_VERSION
 
