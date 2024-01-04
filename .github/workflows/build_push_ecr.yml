@@ -1,26 +1,39 @@
-name: Build and push
+name: Build, push and deploy
 
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
-  # push:
-  #   branches: [ "main" ]
-  # pull_request:
-  #   branches: [ "main" ]
+   pull_request:
+     branches:
+       - main
+       - 'release/**'
   workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: 'eu-central-1'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     environment: test
     steps:
-      - uses: actions/checkout@v3
+      - name: Extract release version
+        run: echo "RELEASE_VERSION=$(echo ${GITHUB_REF#refs/heads/release/**})" >> $GITHUB_ENV
+        if: startsWith(github.ref, 'refs/heads/release/**')
+
       - name: Build and push Docker image
+        uses: actions/checkout@v3
         run: |
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 695079529626.dkr.ecr.eu-central-1.amazonaws.com
-          docker build -t app_ecr .
-          docker tag app_ecr:latest 695079529626.dkr.ecr.eu-central-1.amazonaws.com/app_ecr:latest
-          docker push 695079529626.dkr.ecr.eu-central-1.amazonaws.com/app_ecr:latest
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'eu-central-1'
+          docker build -t my-project:$RELEASE_VERSION . 
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ vars.$ECR_REPOSITORY }}
+          docker tag my-project:$RELEASE_VERSION ${{ vars.$ECR_REPOSITORY }}/my-project:$RELEASE_VERSION
+          docker push $ECR_REPOSITORY/my-project:$RELEASE_VERSION
+
+      - name: Deploy helm chart
+        uses: actions/checkout@v3
+        run: |
+          cd kubernetes
+          aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
+          helm upgrade --install app-chart ./app-chart --set image.tag=$RELEASE_VERSION
+        if: env.RELEASE_VERSION != ''

@@ -10,11 +10,11 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: public.ecr.aws/d1s2e7g7/my-project:runner
     environment: test
     steps:
       - uses: actions/checkout@v3
-      - name: Build and push Docker image
+      - name: Deploy helm chart
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region eu-central-1 --name app-eks-cluster
