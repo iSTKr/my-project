@@ -13,7 +13,7 @@ env:
   AWS_DEFAULT_REGION: 'eu-central-1'
 
 jobs:
-  build:
+  build-push-deploy:
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -21,19 +21,19 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Extract release version
-        run: echo "RELEASE_VERSION=$(echo ${GITHUB_REF#refs/heads/release/**})" >> $GITHUB_ENV
-        if: startsWith(github.ref, 'refs/heads/release/**')
+        run: |
+          echo "RELEASE_VERSION=$(echo ${GITHUB_HEAD_REF#release/**})" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         run: |
-          docker build -t my-project:$RELEASE_VERSION . 
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPOSITORY
-          docker tag my-project:$RELEASE_VERSION $ECR_REPOSITORY/my-project:$RELEASE_VERSION
-          docker push $ECR_REPOSITORY/my-project:$RELEASE_VERSION
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ vars.ECR_REPOSITORY }}
+          docker build -t my-project:$RELEASE_VERSION .
+          docker tag my-project:$RELEASE_VERSION ${{ vars.ECR_REPOSITORY }}/my-project:$RELEASE_VERSION
+          docker push ${{ vars.ECR_REPOSITORY }}/my-project:$RELEASE_VERSION
 
       - name: Deploy helm chart
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
-          helm upgrade --install app-chart ./app-chart --set image.tag=$RELEASE_VERSION
+          helm upgrade --install app-chart ./app-chart --set frontend.image=public.ecr.aws/d1s2e7g7/my-project:$RELEASE_VERSION
         if: env.RELEASE_VERSION != ''

@@ -1,0 +1,20 @@
+name: Uninstall helm chart
+
+on:
+  workflow_dispatch:
+
+jobs:
+  uninstall:
+    runs-on: public.ecr.aws/d1s2e7g7/my-project:runner
+    environment: test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Uninstall helm chart
+        run: |
+          cd kubernetes
+          aws eks update-kubeconfig --region eu-central-1 --name app-eks-cluster
+          helm uninstall app-chart ./app-chart
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'eu-central-1'
