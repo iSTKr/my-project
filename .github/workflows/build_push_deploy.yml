@@ -35,5 +35,5 @@ jobs:
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
-          helm upgrade --install app-chart ./app-chart --set image.tag=$RELEASE_VERSION
+          helm upgrade --install app-chart ./app-chart --set frontend.image=public.ecr.aws/d1s2e7g7/my-project:$RELEASE_VERSION
         if: env.RELEASE_VERSION != ''

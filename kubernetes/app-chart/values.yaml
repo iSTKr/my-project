@@ -8,7 +8,6 @@ image:
   repository: nginx
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
@@ -98,9 +97,7 @@ tolerations: []
 affinity: {}
 
 frontend:
-  image:
-    repository: public.ecr.aws/d1s2e7g7/my-project
-    tag: "latest"
+  image: public.ecr.aws/d1s2e7g7/my-project
   replicas: 1
 
 redisLeader:
