@@ -38,9 +38,9 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-#service:
-#  type: LoadBalancer
-#  port: 80
+service:
+  type: ClusterIP
+  port: 80
 
 ingress:
   enabled: false
@@ -97,8 +97,9 @@ tolerations: []
 affinity: {}
 
 frontend:
-  image: public.ecr.aws/d1s2e7g7/my-project
+  image: my-project:0.2
   replicas: 1
+  pullPolicy: Never
 
 redisLeader:
   image: docker.io/redis:6.0.5

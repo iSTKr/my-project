@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: php-redis
-        image: public.ecr.aws/d1s2e7g7/my-project:latest
+        image: public.ecr.aws/d1s2e7g7/my-project@sha256:f634448d642d939e31ddc9dc04cb2556b50b5469a263221a7bfe2b76061ccc1b
+#        imagePullPolicy: Never
         resources:
           requests:
             cpu: 100m
