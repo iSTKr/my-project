@@ -26,16 +26,6 @@ resource "aws_ecr_repository" "app_ecr" {
   }
 }
 
-resource "aws_cognito_user_pool" "my_pool" {
-  name = "app-user-pool"
-}
-
-resource "aws_cognito_user_pool_client" "client" {
-  name = "app-client"
-
-  user_pool_id = aws_cognito_user_pool.my_pool.id
-}
-
 data "aws_availability_zones" "available" {
   filter {
     name   = "opt-in-status"
