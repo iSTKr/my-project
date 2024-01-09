@@ -43,7 +43,7 @@ service:
   port: 80
 
 ingress:
-  enabled: false
+  enabled: true
   className: ""
   annotations: {}
     # kubernetes.io/ingress.class: nginx
@@ -98,7 +98,7 @@ affinity: {}
 
 frontend:
   image: public.ecr.aws/d1s2e7g7/my-project
-  replicas: 1
+  replicas: 3
 
 redisLeader:
   image: docker.io/redis:6.0.5
