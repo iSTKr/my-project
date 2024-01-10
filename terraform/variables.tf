@@ -10,7 +10,7 @@ variable "helm_ecr_vars" {
     scan_on_push          : bool
   })
   default = {
-    name                  = "helm_app_ecr"
+    name                  = "app-chart"
     image_tag_mutability  = "MUTABLE"
     scan_on_push          = false
   }
@@ -23,7 +23,7 @@ variable "image_ecr_vars" {
     scan_on_push          : bool
   })
   default = {
-    name                  = "image_app_ecr"
+    name                  = "my-project"
     image_tag_mutability  = "MUTABLE"
     scan_on_push          = false
   }

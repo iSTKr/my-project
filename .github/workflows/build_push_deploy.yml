@@ -25,8 +25,8 @@ jobs:
 
       - name: Parse outputs
         run: |
-          echo "HELM_ECR_REPO=$(jq -r .ecr_repository_name.helm_ecr.value outputs.json)" >> $GITHUB_ENV
-          echo "IMAGE_ECR_REPO=$(jq -r .ecr_repository_name.image_ecr.value outputs.json)" >> $GITHUB_ENV
+          echo "HELM_ECR_REPO=$(jq -r .ecr_helm_repository_name.value outputs.json)" >> $GITHUB_ENV
+          echo "IMAGE_ECR_REPO=$(jq -r .ecr_image_repository_name.value outputs.json)" >> $GITHUB_ENV
           echo "EKS_CLUSTER_NAME=$(jq -r .eks_cluster_name.value outputs.json)" >> $GITHUB_ENV
 
       - name: Extract versions from Chart.yaml
@@ -37,22 +37,22 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ vars.ECR_REPOSITORY }}
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ env.IMAGE_ECR_REPO }}
           docker build -t my-project:${{ env.APP_VERSION }} .
-          docker tag my-project:${{ env.APP_VERSION }} ${{ vars.ECR_REPOSITORY }}/my-project:${{ env.APP_VERSION }}
-          docker push ${{ vars.ECR_REPOSITORY }}/my-project:${{ env.APP_VERSION }}
+          docker tag my-project:${{ env.APP_VERSION }} ${{ env.IMAGE_ECR_REPO }}:${{ env.APP_VERSION }}
+          docker push ${{ env.IMAGE_ECR_REPO }}:${{ env.APP_VERSION }}
 
       - name: Package and push Helm chart
         run: |
           cd kubernetes
-          sed -i 's|image: ${{ vars.ECR_REPOSITORY }}/my-project|image: ${{ vars.ECR_REPOSITORY }}/my-project:${{ env.APP_VERSION }}|' app-chart/values.yaml
+          sed -i 's|image: image_repo|image: ${{ env.IMAGE_ECR_REPO }}:${{ env.APP_VERSION }}|' app-chart/values.yaml
           cat app-chart/values.yaml
           helm package app-chart
-          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | helm registry login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | helm registry login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
           helm push "app-chart-${{ env.CHART_VERSION }}.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/
 
       - name: Install Helm chart
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name ${{ env.EKS_CLUSTER_NAME }}
-          helm upgrade --install app-chart oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart --version ${{ env.CHART_VERSION }}
+          helm upgrade --install app-chart oci://${{ env.HELM_ECR_REPO }} --version ${{ env.CHART_VERSION }}
