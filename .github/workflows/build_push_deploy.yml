@@ -16,15 +16,11 @@ jobs:
     environment: test
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Download a Terrafrom outputs
-        uses: actions/download-artifact@v2
-        with:
-          name: terraform-outputs
-
-      - name: Parse outputs
+      - name: Download a Terrafrom outputs && parse
         run: |
+          aws s3 cp s3://app-s3-bucket-tfstate/ outputs.json
           echo "HELM_ECR_REPO=$(jq -r .ecr_helm_repository_name.value outputs.json)" >> $GITHUB_ENV
           echo "IMAGE_ECR_REPO=$(jq -r .ecr_image_repository_name.value outputs.json)" >> $GITHUB_ENV
           echo "EKS_CLUSTER_NAME=$(jq -r .eks_cluster_name.value outputs.json)" >> $GITHUB_ENV
