@@ -18,22 +18,11 @@ provider "aws" {
 }
 
 resource "aws_ecr_repository" "app_ecr" {
-  name                 = "app_ecr"
-  image_tag_mutability = "MUTABLE"
-
+  name                 = var.ecr_vars.name
+  image_tag_mutability = var.ecr_vars.image_tag_mutability
   image_scanning_configuration {
-    scan_on_push = false
+    scan_on_push = var.ecr_vars.scan_on_push
   }
-}
-
-resource "aws_cognito_user_pool" "my_pool" {
-  name = "app-user-pool"
-}
-
-resource "aws_cognito_user_pool_client" "client" {
-  name = "app-client"
-
-  user_pool_id = aws_cognito_user_pool.my_pool.id
 }
 
 data "aws_availability_zones" "available" {
@@ -47,37 +36,37 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.0.0"
 
-  name = "app-vpc"
+  name = var.vpc_vars.name
 
-  cidr = "10.0.0.0/16"
+  cidr = var.vpc_vars.cidr
   azs  = slice(data.aws_availability_zones.available.names, 0, 3)
 
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets  = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+  private_subnets = var.vpc_vars.private_subnets
+  public_subnets  = var.vpc_vars.public_subnets
 
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  enable_dns_hostnames = true
+  enable_nat_gateway   = var.vpc_vars.enable_nat_gateway
+  single_nat_gateway   = var.vpc_vars.single_nat_gateway
+  enable_dns_hostnames = var.vpc_vars.enable_dns_hostnames
 }
 
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = "app-eks-cluster"
+  cluster_name    = var.eks_vars.cluster_name
   cluster_version = "1.27"
-  cluster_endpoint_public_access = true
+  cluster_endpoint_public_access = var.eks_vars.cluster_endpoint_public_access
 
   vpc_id           = module.vpc.vpc_id
   subnet_ids       = module.vpc.private_subnets
 
   eks_managed_node_groups = {
-    one = {
-      name = "node-group-1"
+    group_one = {
+      name = var.eks_vars.node_group_one_name
 
-      instance_types = ["t2.micro"]
+      instance_types = var.eks_vars.instance_types
 
-      min_size     = 1
-      max_size     = 2
-      desired_size = 2
+      min_size     = var.eks_vars.min_size
+      max_size     = var.eks_vars.max_size
+      desired_size = var.eks_vars.desired_size
     }
   }
 }
