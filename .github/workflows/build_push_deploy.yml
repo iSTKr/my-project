@@ -22,24 +22,24 @@ jobs:
         run: |
           echo "CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')" >> $GITHUB_ENV
           echo "APP_VERSION=$(grep '^appVersion:' Chart.yaml | awk '{print $2}' | tr -d '\"')" >> $GITHUB_ENV
-          echo "chart:$CHART_VERSION app:$APP_VERSION"
+          echo "chart:${{ env.APP_VERSION }} app:${{ env.APP_VERSION }}"
 
       - name: Build and push Docker image
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ vars.ECR_REPOSITORY }}
-          docker build -t my-project:$APP_VERSION .
-          docker tag my-project:$APP_VERSION ${{ vars.ECR_REPOSITORY }}/my-project:$APP_VERSION
-          docker push ${{ vars.ECR_REPOSITORY }}/my-project:$APP_VERSION
+          docker build -t my-project:${{ env.APP_VERSION }} .
+          docker tag my-project:${{ env.APP_VERSION }} ${{ vars.ECR_REPOSITORY }}/my-project:${{ env.APP_VERSION }}
+          docker push ${{ vars.ECR_REPOSITORY }}/my-project:${{ env.APP_VERSION }}
 
       - name: Package and push Helm chart
         run: |
           cd kubernetes
           helm package app-chart
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | helm registry login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
-          helm push "app-chart-$CHART_VERSION.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart
+          helm push "app-chart-${{ env.APP_VERSION }}.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart
 
       - name: Install Helm chart
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
-          helm install app-chart oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart --version $CHART_VERSION
+          helm install app-chart oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart --version ${{ env.APP_VERSION }}
