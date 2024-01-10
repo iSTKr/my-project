@@ -23,7 +23,6 @@ jobs:
           cd kubernetes/app-chart
           echo "CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')" >> $GITHUB_ENV
           echo "APP_VERSION=$(grep '^appVersion:' Chart.yaml | awk '{print $2}' | tr -d '\"')" >> $GITHUB_ENV
-          echo ${{ env.CHART_VERSION }}:${{ env.APP_VERSION }}
 
       - name: Build and push Docker image
         run: |
@@ -37,7 +36,7 @@ jobs:
           cd kubernetes
           helm package app-chart
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | helm registry login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
-          helm push "app-chart-${{ env.APP_VERSION }}.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart
+          helm push app-chart-${{ env.APP_VERSION }}.tgz oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart
 
       - name: Install Helm chart
         run: |
