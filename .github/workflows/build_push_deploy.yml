@@ -34,12 +34,13 @@ jobs:
       - name: Package and push Helm chart
         run: |
           cd kubernetes
+          sed -i 's|frontend.image:.*|frontend.image: ${{ vars.ECR_REPOSITORY }}/my-project:${{ env.CHART_VERSION }}|' app-chart/values.yaml
           helm package app-chart
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | helm registry login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
-          helm push "app-chart-${{ env.APP_VERSION }}.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/
+          helm push "app-chart-${{ env.CHART_VERSION }}.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/
 
       - name: Install Helm chart
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
-          helm install app-chart oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart --version ${{ env.APP_VERSION }}
+          helm install app-chart oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart --version ${{ env.CHART_VERSION }}
