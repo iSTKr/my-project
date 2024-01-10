@@ -17,11 +17,19 @@ provider "aws" {
   region = "eu-central-1"
 }
 
-resource "aws_ecr_repository" "app_ecr" {
-  name                 = var.ecr_vars.name
-  image_tag_mutability = var.ecr_vars.image_tag_mutability
+resource "aws_ecr_repository" "helm_ecr" {
+  name                 = var.helm_ecr_vars.name
+  image_tag_mutability = var.helm_ecr_vars.image_tag_mutability
   image_scanning_configuration {
-    scan_on_push = var.ecr_vars.scan_on_push
+    scan_on_push = var.helm_ecr_vars.scan_on_push
+  }
+}
+
+resource "aws_ecr_repository" "image_ecr" {
+  name                 = var.image_ecr_vars.name
+  image_tag_mutability = var.image_ecr_vars.image_tag_mutability
+  image_scanning_configuration {
+    scan_on_push = var.image_ecr_vars.scan_on_push
   }
 }
 
@@ -71,12 +79,14 @@ module "eks" {
   }
 }
 
-output "ecr_repository_name" {
-  description = "The name of the created ECR repository"
-  value       = aws_ecr_repository.app_ecr.name
+output "ecr_helm_repository_name" {
+  value       = aws_ecr_repository.helm_ecr.repository_url
+}
+
+output "ecr_image_repository_name" {
+  value       = aws_ecr_repository.image_ecr.repository_url
 }
 
 output "eks_cluster_name" {
-  description = "The name of the created EKS cluster"
   value       = module.eks.cluster_name
 }

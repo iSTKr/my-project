@@ -18,6 +18,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Download a Terrafrom outputs
+        uses: actions/download-artifact@v2
+        with:
+          name: terraform-outputs
+
+      - name: Parse outputs
+        run: |
+          echo "HELM_ECR_REPO=$(jq -r .ecr_repository_name.helm_ecr.value outputs.json)" >> $GITHUB_ENV
+          echo "IMAGE_ECR_REPO=$(jq -r .ecr_repository_name.image_ecr.value outputs.json)" >> $GITHUB_ENV
+          echo "EKS_CLUSTER_NAME=$(jq -r .eks_cluster_name.value outputs.json)" >> $GITHUB_ENV
+
       - name: Extract versions from Chart.yaml
         run: |
           cd kubernetes/app-chart
@@ -43,5 +54,5 @@ jobs:
       - name: Install Helm chart
         run: |
           cd kubernetes
-          aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
+          aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name ${{ env.EKS_CLUSTER_NAME }}
           helm upgrade --install app-chart oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart --version ${{ env.CHART_VERSION }}

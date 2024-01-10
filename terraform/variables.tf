@@ -3,14 +3,27 @@ variable "aws_region" {
   default = "eu-central-1"
 }
 
-variable "ecr_vars" {
+variable "helm_ecr_vars" {
   type = object({
     name                  : string
     image_tag_mutability  : string
     scan_on_push          : bool
   })
   default = {
-    name                  = "app_ecr"
+    name                  = "helm_app_ecr"
+    image_tag_mutability  = "MUTABLE"
+    scan_on_push          = false
+  }
+}
+
+variable "image_ecr_vars" {
+  type = object({
+    name                  : string
+    image_tag_mutability  : string
+    scan_on_push          : bool
+  })
+  default = {
+    name                  = "image_app_ecr"
     image_tag_mutability  = "MUTABLE"
     scan_on_push          = false
   }
