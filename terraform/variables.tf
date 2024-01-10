@@ -3,10 +3,6 @@ variable "aws_region" {
   default = "eu-central-1"
 }
 
-variable "spot_instance_types" {
-  default     = ["t2.small"]
-}
-
 variable "ecr_vars" {
   type = object({
     name                  : string
@@ -55,9 +51,9 @@ variable "eks_vars" {
     cluster_name                    = "app-eks-cluster"
     cluster_endpoint_public_access  = "true"
     node_group_one_name             = "node-group-1"
-    instance_types                  = ["t2.micro"]
-    min_size                        = 1
+    instance_types                  = ["t2.medium"]
+    min_size                        = 0
     max_size                        = 2
-    desired_size                    = 2
+    desired_size                    = 1
   }
 }

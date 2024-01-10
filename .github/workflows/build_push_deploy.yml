@@ -1,10 +1,6 @@
 name: Build, push and deploy
 
 on:
-  pull_request:
-    branches:
-      - main
-      - 'release/**'
   workflow_dispatch:
 
 env:
@@ -20,20 +16,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Extract release version
+      - name: Extract tag version
         run: |
-          echo "RELEASE_VERSION=$(echo ${GITHUB_HEAD_REF#release/**})" >> $GITHUB_ENV
+          echo "CHART_VERSION=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
+
+      - name: Extract versions from Chart.yaml
+        run: |
+          echo "CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')" >> $GITHUB_ENV
+          echo "APP_VERSION=$(grep '^appVersion:' Chart.yaml | awk '{print $2}' | tr -d '\"')" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ vars.ECR_REPOSITORY }}
-          docker build -t my-project:$RELEASE_VERSION .
-          docker tag my-project:$RELEASE_VERSION ${{ vars.ECR_REPOSITORY }}/my-project:$RELEASE_VERSION
-          docker push ${{ vars.ECR_REPOSITORY }}/my-project:$RELEASE_VERSION
+          docker build -t my-project:$APP_VERSION .
+          docker tag my-project:$APP_VERSION ${{ vars.ECR_REPOSITORY }}/my-project:$APP_VERSION
+          docker push ${{ vars.ECR_REPOSITORY }}/my-project:$APP_VERSION
 
-      - name: Deploy helm chart
+      - name: Package and push Helm chart
+        run: |
+          cd kubernetes
+          helm package app-chart
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | helm registry login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
+          helm push "app-chart-$CHART_VERSION.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart
+
+      - name: Install Helm chart
         run: |
           cd kubernetes
           aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name app-eks-cluster
-          helm upgrade --install app-chart ./app-chart --set frontend.image=public.ecr.aws/d1s2e7g7/my-project:$RELEASE_VERSION
-        if: env.RELEASE_VERSION != ''
+          helm install app-chart oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/app-chart --version $CHART_VERSION

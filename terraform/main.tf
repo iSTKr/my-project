@@ -70,3 +70,13 @@ module "eks" {
     }
   }
 }
+
+output "ecr_repository_name" {
+  description = "The name of the created ECR repository"
+  value       = aws_ecr_repository.app_ecr.name
+}
+
+output "eks_cluster_name" {
+  description = "The name of the created EKS cluster"
+  value       = module.eks.cluster_name
+}
