@@ -20,7 +20,7 @@ jobs:
 
       - name: Extract versions from Chart.yaml
         run: |
-          cd kubernetes
+          cd kubernetes/app-chart
           echo "CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')" >> $GITHUB_ENV
           echo "APP_VERSION=$(grep '^appVersion:' Chart.yaml | awk '{print $2}' | tr -d '\"')" >> $GITHUB_ENV
           echo "chart:${{ env.APP_VERSION }} app:${{ env.APP_VERSION }}"
