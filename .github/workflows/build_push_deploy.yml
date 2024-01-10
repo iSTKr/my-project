@@ -3,7 +3,6 @@ name: Build, push and deploy
 on:
   push:
     tags:
-      - *
   workflow_dispatch:
 
 env:
