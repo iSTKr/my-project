@@ -3,7 +3,7 @@ service:
   port: 80
 
 frontend:
-  image: public.ecr.aws/d1s2e7g7/my-project
+  image: public.ecr.aws/d1s2e7g7/my-project:0.3.0
   replicas: 3
 
 redisLeader:
