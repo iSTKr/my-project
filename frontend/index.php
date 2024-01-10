@@ -11,7 +11,7 @@
       <h2>Guestbook</h2>
       <?php $hostname = getenv('HOSTNAME'); ?>
       <h4>Pod ID: <?php echo $hostname; ?></h4>
-      <h2>Release 0.2</h2>
+      <h5>Release 0.3</h5>
     <form>
     <fieldset>
     <input ng-model="msg" placeholder="Messages" class="form-control" type="text" name="input"><br>
