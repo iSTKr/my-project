@@ -42,7 +42,6 @@ jobs:
         run: |
           cd kubernetes
           sed -i 's|image: image_repo|image: ${{ env.IMAGE_ECR_REPO }}:${{ env.APP_VERSION }}|' app-chart/values.yaml
-          cat app-chart/values.yaml
           helm package app-chart
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | helm registry login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
           helm push "app-chart-${{ env.CHART_VERSION }}.tgz" oci://${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/
